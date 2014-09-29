@@ -31,7 +31,29 @@ public:
   
 };
 
-
+class CombinationSum1 {
+public:
+  vector<vector<int> > combinationSum(vector<int> &candidates, int target) {
+    sort(candidates.begin(), candidates.end());
+    vector<vector<int> > res;
+    getCombinationSum(candidates, 0, vector<int>(), res, target);
+    return res;
+  }
+  
+  void getCombinationSum(vector<int> &values, int idx, vector<int> curr, vector<vector<int> > &res, int target) {
+    if (target == 0) {
+      res.push_back(curr);
+      return;
+    }
+    if (idx >= values.size() || target < values[idx]) {
+      return;
+    }
+    for (int i = 0; i <= target / values[idx]; i++) {
+      getCombinationSum(values, idx + 1, curr, res, target - i * values[idx]);
+      curr.push_back(values[idx]);
+    }
+  }
+};
 
 void PrintVector(vector<int> &v) {
   cout<<"[ ";
@@ -39,6 +61,13 @@ void PrintVector(vector<int> &v) {
     cout<< " " << x;
   }
   cout<< " ]"<<endl;
+}
+
+void PrintVectorOfVector(vector<vector<int> > &v) {
+  for (auto tmp : v) {
+    PrintVector(tmp);
+  }
+  cout<<endl;
 }
 
 vector<int> getRandomVector(int size, int rangeStart, int rangeEnd) {
@@ -62,8 +91,10 @@ int main(void) {
   PrintVector(input);
   cout<<endl;
   vector<vector<int> > subsets = test.subsets(input);
-  for (auto v : subsets) {
-    PrintVector(v);
-  }
-  cout<<endl;
+  PrintVectorOfVector(subsets);
+  
+  vector<int> v {1, 2, 3, 4, 5};
+  CombinationSum1 combSum1;
+  vector<vector<int> > combs = combSum1.combinationSum(v, 5);
+  PrintVectorOfVector(combs);
 }
