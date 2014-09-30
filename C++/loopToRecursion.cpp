@@ -55,6 +55,28 @@ public:
   }
 };
 
+class Combinations {
+public:
+  vector<vector<int> > combine(int n, int k) {
+    vector<vector<int> > res;
+    getCombination(n, k, 1, vector<int>(), res);
+    return res;
+  }
+  
+  void getCombination(int n, int k, int num, vector<int> curr, vector<vector<int> > &res) {
+    if (curr.size() == k) {
+      res.push_back(curr);
+      return;
+    }
+    if (num > n || n - num + 1 < k - curr.size()) {
+      return;
+    }
+    getCombination(n, k, num + 1, curr, res);
+    curr.push_back(num);
+    getCombination(n, k, num + 1, curr, res);
+  }
+};
+
 void PrintVector(vector<int> &v) {
   cout<<"[ ";
   for (int x : v) {
@@ -96,5 +118,9 @@ int main(void) {
   vector<int> v {1, 2, 3, 4, 5};
   CombinationSum1 combSum1;
   vector<vector<int> > combs = combSum1.combinationSum(v, 5);
+  PrintVectorOfVector(combs);
+
+  Combinations comb;
+  combs = comb.combine(5, 3);
   PrintVectorOfVector(combs);
 }
