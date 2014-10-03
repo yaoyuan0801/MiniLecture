@@ -8,6 +8,7 @@
 #include <limits.h>
 #include <time.h>
 #include <unordered_map>
+#include <map>
 #include <math.h>
 #include <set>
 
@@ -21,12 +22,22 @@ void printVector(vector<int> &v) {
   cout<< " ]"<<endl;
 }
 
+void printSet(set<int> &v) {
+  cout<<"[ ";
+  for (int x : v) {
+    cout<< " " << x;
+  }
+  cout<< " ]"<<endl;
+}
+
+
 void printVectorOfVector(vector<vector<int> > &v) {
   for (auto tmp : v) {
     printVector(tmp);
   }
   cout<<endl;
 }
+
 
 class SquareRing {
 public:
@@ -82,10 +93,71 @@ public:
   }
 };
 
+void reverseVector(vector<int> &v) {
+  int i = 0, j = v.size() - 1;
+  while(i < j) {
+    swap(v[i++], v[j--]);
+  }
+  
+}
+
+typedef int JobID;
+
+class TopoSort {
+public:
+  bool visit(JobID id, map<JobID, int> &mark, map<JobID, set<JobID> > &adjMap, vector<JobID> &result) {
+    if (mark.find(id) != mark.end() && mark[id] == 1) {
+      return false;
+    }
+    if (mark.find(id) != mark.end() && mark[id] == 0) {
+      mark[id] = 1;
+      if (adjMap.find(id) != adjMap.end()) {
+        for (JobID nextId : adjMap[id]) {
+          if (!visit(nextId, mark, adjMap, result)) {
+            return false;
+          }
+        }
+      }
+      mark.erase(id);
+      result.push_back(id);
+    }
+    return true;
+  }
+  
+  bool jobSchedule(const map<JobID, vector<JobID> > &deps, int n, vector<JobID> &result) {
+    map<JobID, set<JobID> > adjMap;
+    map<JobID, int> mark;
+    for (auto& it : deps) {
+      for (JobID idx : it.second) {
+        if (adjMap.find(idx) == adjMap.end()) {
+          adjMap[idx] = set<JobID>();
+        }
+        adjMap[idx].insert(it.first);
+      }
+    }
+    for (JobID i = 1; i <= n; i++) {
+      mark[i] = 0;
+    }
+    while (!mark.empty()) {
+      if (!visit(mark.begin()->first,  mark, adjMap, result)) {
+        return false;
+      }
+    }
+    reverseVector(result);
+    return true;
+  }
+};
+
 int main(void) {
   vector<vector<int> > res;
+  
   SquareRing ring;
   res = ring.squareRing(35);
   printVectorOfVector(res);
+  
+  TopoSort topoSort;
+  vector<JobID> topoSortRes;
+  cout<<topoSort.jobSchedule(map<JobID, vector<JobID>>(), 2, topoSortRes) <<endl;
+  printVector(topoSortRes);
   return 0;
 }
