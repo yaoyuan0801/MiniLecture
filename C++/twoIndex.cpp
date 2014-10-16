@@ -8,6 +8,7 @@
 #include <limits.h>
 #include <time.h>
 #include <map>
+#include <unordered_map>
 
 using namespace std;
 
@@ -53,11 +54,43 @@ int distanceOfClosestNumber(int a, int b, const vector<int> &v) {
   return d == INT_MAX ? -1 : d;
 }
 
+string minWindow(string S, string T) {
+  unordered_map<char, int> mS, mT;
+  for (char c : T) {
+    mS[c] = 0;
+    mT[c]++;
+  }
+  int d = INT_MAX;
+  int idx = 0, total = 0;
+  string res;
+  for (int i = 0; i < S.size(); i++) {
+    if (mS.find(S[i]) == mS.end()) {
+      continue;
+    }
+    if (mS[S[i]] <mT[S[i]]) {
+      total++;
+    }
+    mS[S[i]]++;
+    while ((mS.find(S[idx]) == mS.end() || mS[S[idx]] > mT[S[idx]])) {
+      if (mS.find(S[idx]) != mS.end()) {
+        mS[S[idx]]--;
+      }
+      idx++;
+    }
+    if (total == T.size() && i - idx + 1 < d) {
+      d = i - idx + 1;
+      res = S.substr(idx, d);
+    }
+  }
+  return res;
+}
+
 int main(void) {
   int n = 10;
   vector<int> input = getRandomVector(n, 0, 5);
   printVector(input);
   cout<<endl;
   cout << distanceOfClosestNumber(1, 1, input) << endl;
+  cout << minWindow("ADOBECODEBANC", "ABC") <<endl;
   return 0;
 }
