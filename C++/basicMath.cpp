@@ -25,7 +25,8 @@ struct bigInt {
   vector<int> number;
   bigInt(int s, vector<int> num) : sign(s), number(num) {}
   
-  void print() {
+  
+  void print() const {
     if (sign == 0) {
       cout<< 0 <<endl;
       return;
@@ -40,48 +41,64 @@ struct bigInt {
 
 class bigIntOperator {
 public:
-  bigInt add(bigInt& a, bigInt& b) {
+  bigInt add(const bigInt &a, const bigInt &b) {
     if (a.sign == 0) {
       return b;
     }
     if (b.sign == 0) {
       return a;
     }
-    if (compareAbs(a, b)) {
-      swap(a, b);
+    bigInt aa(a), bb(b);
+    if (compareAbs(aa, bb)) {
+      swap(aa, bb);
     }
-    if (a.sign == b.sign) {
-      bigInt res = addAbs(a, b);
-      res.sign = a.sign;
+    if (aa.sign == bb.sign) {
+      bigInt res = addAbs(aa, bb);
+      res.sign = aa.sign;
       return res;
     }
-    bigInt res = subtractAbs(a, b);
-    if (a.sign == -1) {
+    bigInt res = subtractAbs(aa, bb);
+    if (aa.sign == -1) {
       res.sign = -1;
     }
     return res;
   }
   
-  bigInt subtract(bigInt& a, bigInt& b) {
-    bigInt bb(b);
+  bigInt subtract(const bigInt &a, const bigInt &b) {
+    bigInt aa(a), bb(b);
     bb.sign = -bb.sign;
-    return add(a, bb);
+    return add(aa, bb);
   }
   
-  bigInt multiply(bigInt& a, bigInt& b) {
+  bigInt multiply(const bigInt &a, const bigInt &b) {
     if (a.sign == 0 || b.sign == 0) {
       return bigInt(0, vector<int>());
     }
+     bigInt aa(a), bb(b);
     if (compareAbs(a, b)) {
-      swap(a, b);
+      swap(aa, bb);
     }
-    bigInt res = multiplyAbs(a, b);
+    bigInt res = multiplyAbs(aa, bb);
+    res.sign = aa.sign * bb.sign;
+    return res;
+  }
+  
+  bigInt divide(const bigInt &a,  const bigInt &b) {
+    if (b.sign == 0) {
+      cout<<"Bad input"<<endl;
+      return b;
+    }
+    if (compareAbs(a, b)) {
+      return bigInt(0, vector<int>());
+    }
+    bigInt aa(a), bb(b);
+    bigInt res = divideAbs(aa, bb);
     res.sign = a.sign * b.sign;
     return res;
   }
   
 private:
-   bool compareAbs(bigInt& a, bigInt& b) {
+   bool compareAbs(const bigInt &a, const bigInt &b) {
     if (a.number.size() != b.number.size()) {
       return a.number.size() < b.number.size();
     }
@@ -94,7 +111,7 @@ private:
     return false;
   }
   
-  bigInt addAbs(bigInt& a, bigInt &b) {
+  bigInt addAbs(bigInt &a, bigInt &b) {
     vector<int> res;
     int i = a.number.size() - 1, j = b.number.size() - 1, c = 0;
     while (i >= 0 || j >= 0) {
@@ -113,7 +130,7 @@ private:
     return out;
   }
   
-  bigInt subtractAbs(bigInt& a, bigInt &b) {
+  bigInt subtractAbs(bigInt &a, bigInt &b) {
     vector<int> res;
     int i = a.number.size() - 1, j = b.number.size() - 1, c = 0;
     while (i >= 0 || j >= 0) {
@@ -155,6 +172,30 @@ private:
     return res;
   }
   
+  bigInt divideAbs(bigInt &a, bigInt &b) {
+    bigInt partialRes(1, vector<int>{1}), res(0, vector<int>());
+    int count = 0;
+    while (!compareAbs(a, b)) {
+      b.number.push_back(0);
+      partialRes.number.push_back(0);
+      count++;
+    }
+    b.number.pop_back();
+    partialRes.number.pop_back();
+    count--;
+    while (count >= 0) {
+      if (!compareAbs(a, b)) {
+        a = subtractAbs(a, b);
+        res = add(res, partialRes);
+      } else {
+        b.number.pop_back();
+        partialRes.number.pop_back();
+        count--;
+      }
+    }
+    return res;
+  }
+  
   void reverse(vector<int> &v) {
     int i = 0, j = v.size() - 1;
     while (i < j) {
@@ -168,10 +209,30 @@ int main(void) {
   vector<int> a{1,3}, b{1, 2, 5};
   bigInt x(1, a), y(-1, b);
   bigIntOperator oper;
+  
   x.print();
   y.print();
   oper.add(x, y).print();
+  cout<<endl;
+  
+  x.print();
+  y.print();
   oper.subtract(x, y).print();
+  cout<<endl;
+  
+  x.print();
+  y.print();
   oper.multiply(x, y).print();
+  cout<<endl;
+
+  x.print();
+  y.print();
+  oper.divide(x, y).print();
+  cout<<endl;
+  
+  x.print();
+  y.print();
+  oper.divide(y, x).print();
+
   return 0;
 }
