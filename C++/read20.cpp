@@ -13,8 +13,9 @@
 
 using namespace std;
 
+ifstream fin("./read20.cpp");
+
 bool read20(string& buffer) {
-  static ifstream fin("./read20.cpp");
   for (int i = 0; i < 20; i++) {
     char c;
     if (fin >> c) {
@@ -44,13 +45,39 @@ bool readk(string& res, int k) {
   return offset < buffer.size();
 }
 
+bool readKOptimized(string& res, int k) {
+  static string buffer;
+  static int offset = 0;
+  static bool eof = false;
+  if (offset + k >= buffer.size()) {
+    res += buffer.substr(offset);
+    k -= res.size();
+    offset = 0;
+    buffer.clear();
+  }
+  
+  if (!eof) {
+    for (int i = 0; i < k / 20; i++) {
+      if (!read20(res)) {
+        eof = true;
+        return false;
+      }
+    }
+  }
+  
+  k = k % 20;
+  eof = !read20(buffer);
+  string tmp =  buffer.substr(0, k);
+  offset = tmp.size();
+  res += tmp;
+  return res.size() < k;
+}
+
 
 int main(void) {
   string res;
+  
   readk(res, 10);
-  cout<<res<<" "<<res.size()<<endl;
-  res.clear();
-  readk(res, 50);
   cout<<res<<" "<<res.size()<<endl;
   res.clear();
   readk(res, 50);
@@ -62,11 +89,35 @@ int main(void) {
   readk(res, 500);
   cout<<res<<" "<<res.size()<<endl;
   res.clear();
-  readk(res, 451);
+  readk(res, 900);
   cout<<res<<" "<<res.size()<<endl;
   res.clear();
-  readk(res, 50);
+  readk(res, 900);
   cout<<res<<" "<<res.size()<<endl;
   res.clear();
+  fin.close();
+  
+  fin.open("./read20.cpp");
+  cout<<endl;
+  readKOptimized(res, 10);
+  cout<<res<<" "<<res.size()<<endl;
+  res.clear();
+  readKOptimized(res, 50);
+  cout<<res<<" "<<res.size()<<endl;
+  res.clear();
+  readKOptimized(res, 50);
+  cout<<res<<" "<<res.size()<<endl;
+  res.clear();
+  readKOptimized(res, 500);
+  cout<<res<<" "<<res.size()<<endl;
+  res.clear();
+  readKOptimized(res, 900);
+  cout<<res<<" "<<res.size()<<endl;
+  res.clear();
+  readKOptimized(res, 900);
+  cout<<res<<" "<<res.size()<<endl;
+  res.clear();
+  fin.close();
+
   return 0;
 }
