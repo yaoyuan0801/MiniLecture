@@ -1,4 +1,4 @@
-package test;
+package problems;
 
 public class Power {
 	private long powerLast10(int x, int n) {
