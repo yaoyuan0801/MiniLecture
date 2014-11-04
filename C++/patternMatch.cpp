@@ -10,6 +10,23 @@
 
 using namespace std;
 
+bool getNewPatternMap(map<char, string> &m, map<char, string> &res, char c, string &s) {
+  if (m.find(c) != m.end()) {
+    if (m[c] != s) {
+      return false;
+    }
+  } else {
+    for (auto it : m) {
+      if (it.second == s && it.first != c) {
+        return false;
+      }
+    }
+  }
+  res = m;
+  res[c] = s;
+  return true;
+}
+
 bool isPatternMatched(string& str, string& pattern) {
   if (pattern.size() < 1) {
     return true;
@@ -27,13 +44,9 @@ bool isPatternMatched(string& str, string& pattern) {
       for (int k = 1; k <= j; k++) {
         string lastWord = str.substr(k, j - k + 1);
         for (map<char, string> m : res1[k - 1]) {
-          if (m.find(pattern[i]) == m.end()) {
-            map<char, string> m1(m.begin(), m.end());
-            m1[pattern[i]] = lastWord;
-            res2[j].push_back(m1);
-          } else if (m[pattern[i]] == lastWord) {
-            map<char, string> m1(m.begin(), m.end());
-            res2[j].push_back(m1);
+          map<char, string> tmp;
+          if (getNewPatternMap(m, tmp, pattern[i], lastWord)) {
+            res2[j].push_back(tmp);
           }
         }
       }
@@ -56,5 +69,7 @@ int main(void) {
   cout << isPatternMatched(str, pattern) << endl;
   str = "bigboyboybig";
   pattern = "ABBA";
+  cout << isPatternMatched(str, pattern) << endl;
+  str = "bigbigbigbig";
   cout << isPatternMatched(str, pattern) << endl;
 }
