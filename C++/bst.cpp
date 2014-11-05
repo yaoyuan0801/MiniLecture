@@ -44,7 +44,7 @@ struct TreeNode {
 class Tree {
 private:
   TreeNode* _root;
-  
+  size_t _nodeCount; 
   void inOrderRecursive(TreeNode* root) {
     if (!root) {
       return;
@@ -73,8 +73,8 @@ private:
    }
   
 public:
-  Tree() : _root(NULL) {}
-  Tree(TreeNode* r) : _root(r) {}
+  Tree() : _root(NULL), _nodeCount(0) {}
+  Tree(TreeNode* r) : _root(r), _nodeCount(1) {}
   ~Tree() {
     destroy(_root);
   }
@@ -129,6 +129,10 @@ public:
   TreeNode* getRoot() {
     return _root;
   }
+
+  int getNodeCount() {
+    return _nodeCount;
+  }
   
   void insert(int x) {
     TreeNode* prev = NULL, *curr = _root;
@@ -144,6 +148,7 @@ public:
       }
     }
     TreeNode* tmp = new TreeNode(x);
+    _nodeCount++;
     if (!prev) {
       _root = tmp;
       return;
@@ -185,9 +190,44 @@ public:
 };
 
 
+TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* node1, TreeNode* node2) {
+  if (node1 == node2) {
+    return node1;
+  }
+  if (!root) {
+    return NULL;
+  }
+  TreeNode* left = lowestCommonAncestor(root->left, node1, node2);
+  TreeNode* right = lowestCommonAncestor(root->right, node1, node2);
+  if (left && right) {
+    return root;
+  }
+  if (root == node1 || root == node2) {
+    return root;
+  }
+  if (left) {
+    return left;
+  } else {
+    return right;
+  }
+}
+
+TreeNode* getRandomNode(Tree& t, int n) {
+  BstIterator it(t.getRoot());
+  static default_random_engine generator((unsigned int)time(0));
+  uniform_int_distribution<int> distribution(0, n);
+  int x = distribution(generator); 
+  cout << x << endl;
+  for (int i = 1; i < x; i++) {
+    it.next();
+  }
+  cout << endl;
+  return it.next();
+}
+
 int main(void) {
   int n = 10;
-  vector<int> input = getRandomVector(n, 0, 30);
+  vector<int> input = getRandomVector(n, 0, 50);
   Tree t;
   printVector(input);
   for (int x : input) {
@@ -204,6 +244,12 @@ int main(void) {
 
   t.preOrder();
   t.preOrderIterative();
+  
+  TreeNode* node1 = getRandomNode(t, n), *node2 = getRandomNode(t, t.getNodeCount());
+  cout << node1->val <<" " << node2->val << endl;
+  TreeNode* LCA = lowestCommonAncestor(t.getRoot(), node1, node2);
+  cout << LCA->val << endl;
+
   return 0;
 
 }

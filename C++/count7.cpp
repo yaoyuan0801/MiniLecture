@@ -2,57 +2,36 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <map>
 
 using namespace std;
 
-vector<int> c;
-
-int tenPowerN(int n) {
-  int res = 1;
-  for (int i = 0; i < n; i++) {
-    res *= 10;
-  }
-  return res;
-}
-
-void count7Helper(int l) {
-  c.resize(l + 1);
-  c[0] = 0;
-  c[1] = 1;
-  for (int i = 2; i <= l; i++) {
-    c[i] = c[i-1] * 10 + tenPowerN(i-1);
-  }
-  cout << endl;
-}
-
-int toNumber(string s) {
-  if (s.size() == 0) {
-    return 0;
-  }
-  stringstream ss(s);
-  int res;
-  ss >> res;
-  return res;
-}
-
-int count7(string n) {
-  if (c.size() < n.size()) {
-    count7Helper(n.size());
-  }  
-  if (n.size() == 0) {
-    return 0;
-  }
+int count7(int n) {
+  map<int, int> m;
+  m[1] = 0;
+  int k = 10;
+  while (k < n) {
+    m[k] = m[k / 10] * 10 + k / 10;
+    k *= 10;
+  } 
+  
   int res = 0;
-  res += (n[0] - '0') * c[n.size() - 1] + count7(n.substr(1));
-  if (n[0] > '7') {
-    res += tenPowerN(n.size() - 1);
-  }
-  if (n[0] == '7') {
-    res += toNumber(n.substr(1)) + 1;
+  k /= 10;
+  while (n) {
+    int firstDigit = n / k;
+    int currCount = firstDigit * m[k];
+    if (firstDigit > 7) {
+      currCount += k;
+    }
+    if (firstDigit == 7) {
+      currCount += n - k * 7 + 1;
+    }
+    res += currCount;
+    n = n - firstDigit * k;
+    k = k / 10;
   }
   return res;
 }
-
 
 int count7Linear(int n) {
   int res = 0;
@@ -67,8 +46,8 @@ int count7Linear(int n) {
 
 int main(void) {
   for (int n = 1; n < 1000; n++) {
-    if (count7Linear(n) != count7(to_string(n))) {
-      cout << n << endl;
+    if (count7Linear(n) != count7(n)) {
+      cout << n << " " << count7Linear(n) << " " << count7(n) << endl;
     } 
   } 
   return 0;
